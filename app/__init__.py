@@ -16,3 +16,5 @@ connection = mysql.connector.connect(  #change details here to match your mysql 
 
 
 myapp_obj.config['SECRET_KEY'] = 'abc'     
+
+from app import routes
