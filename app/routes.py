@@ -7,9 +7,27 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import User, load_user
 from app.__init__ import connection
 
-
 cursor = connection.cursor()
+@myapp_obj.route("/", methods=['GET', 'POST'])
+@login_required
+def home():
+    user_location_name = None
+    if current_user.is_authenticated:
+        user_type = current_user.user_type
+        if user_type == 'insurance_provider':
+            users_insurance_id = current_user.insurance_id 
+            cursor.execute("SELECT name FROM insurance WHERE insurance_id = %s", (users_insurance_id,))         # Fetch all claims that are from the same insurance as the current user
+            result = cursor.fetchone()
 
+        elif user_type == 'hospital':
+            users_hospital_id = current_user.hospital_id
+            cursor.execute("SELECT name FROM hospital WHERE hospital_id = %s", (users_hospital_id,))         # Fetch all claims that are from the same hospital as the current user
+            result = cursor.fetchone()
+
+        if result:
+            user_location_name = result[0]
+
+    return render_template('home.html', title='Home', user_location_name=user_location_name)
 
 @myapp_obj.route("/signup", methods=['GET', 'POST'])
 def signupPage():
@@ -40,6 +58,7 @@ def signupPage():
             # Log in the user
             login_user(user)
             flash(f'Account created successfully! You are now logged in as {username}', category='success')
+            return redirect(url_for('getname'))
         if form.errors != {}: #If there are errors in signing up
             for err_msg in form.errors.values():
                 flash(f'There was an error with creating a user: {err_msg}', category='danger') #flash appropriate error message
@@ -56,7 +75,7 @@ def loginPage():
         cursor.execute("SELECT * FROM User WHERE username = %s", (username,))
         user = cursor.fetchone()
 
-        if user and check_password_hash(user[5], password): # Assuming password_hash is at index 3
+        if user and check_password_hash(user[5], password):
             login_user(User(user_id=user[0], username=user[1], firstname=user[2], lastname=user[3], email_address=user[4], password_hash=user[5], insurance_id=user[7], hospital_id=user[8]))
 
             flash(f'Success logging in, Logged in as: {username}', category='success')
@@ -117,3 +136,8 @@ def getname():
     for row in cursor.fetchall():
         hospital_names.append(row[0])
     return render_template("getname.html", form=form, insurance_names=insurance_names, hospital_names=hospital_names)
+
+@myapp_obj.context_processor
+def base():
+    form = GetNameForm()
+    return dict(form=form)

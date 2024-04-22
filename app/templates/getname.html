@@ -30,8 +30,6 @@ Select Your Provider
                         {{ form.submit(class="shadow-lg p-2 mb-3 bg-body btn btn-light btn-lg px-5") }}
                       </div>
                       <br>
-                      <p class="shadow-lg p-3 mb-0 bg-body rounded" class="mb-0">Don't see your insurance company? <a href="{{ url_for('addInsurance') }}"
-                        class="text-white-50 fw-bold"><u>Add a new one!</u></a></p>
                   </form>
                   {% endif %}
                   {% if current_user.user_type == "hospital" %}
