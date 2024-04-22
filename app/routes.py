@@ -23,18 +23,19 @@ def signupPage():
             firstname = form.firstname.data
             lastname = form.lastname.data
             password = form.password1.data
+            user_type = form.user_type.data
             # Hash the password before storing it
             password_hash = generate_password_hash(password)
 
             # Insert user data into the database
-            sql = "INSERT INTO User (username, firstname, lastname, email_address, password_hash) VALUES (%s, %s, %s, %s, %s)"
-            val = (username, firstname, lastname, email_address, password_hash)
+            sql = "INSERT INTO User (username, firstname, lastname, email_address, password_hash, user_type) VALUES (%s, %s, %s, %s, %s, %s)"
+            val = (username, firstname, lastname, email_address, password_hash, user_type)
             cursor.execute(sql, val)
             connection.commit()
             user_id = cursor.lastrowid
 
             # Create an instance of the User class
-            user = User(user_id=user_id, username=username, firstname = firstname, lastname = lastname, email_address=email_address, password_hash=password_hash, insurance_id=None, hospital_id=None)
+            user = User(user_id=user_id, username=username, firstname = firstname, lastname = lastname, email_address=email_address, password_hash=password_hash, user_type=user_type, insurance_id=None, hospital_id=None)
 
             # Log in the user
             login_user(user)
