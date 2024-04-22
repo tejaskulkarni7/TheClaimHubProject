@@ -141,3 +141,19 @@ def getname():
 def base():
     form = GetNameForm()
     return dict(form=form)
+
+@myapp_obj.route('/infopage', methods=["GET", "POST"])
+@login_required
+def infopage():
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        user_id = current_user.id
+        feedback_content = form.feedback.data
+
+        sql = "INSERT INTO feedback (user_id, feedback_content) VALUES (%s, %s)"
+        val = (user_id, feedback_content)
+        cursor.execute(sql, val)
+        connection.commit()
+        flash("Feedback received!", category='success')
+        return render_template("home.html", form=form)
+    return render_template("infopage.html", form=form)
