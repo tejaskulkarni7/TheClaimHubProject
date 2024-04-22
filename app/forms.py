@@ -34,3 +34,9 @@ class LoginForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(message="Username required"), DataRequired()])
     password = PasswordField('Password', validators=[InputRequired(message="Password required"), DataRequired()])
     submit = SubmitField('Log In')
+
+#Form to get the name of either the hospital or the insurance provider, this is currently a seperate page right after login
+class GetNameForm(FlaskForm):
+    hospital_name = StringField(label='Hospital Name')
+    insurance_name = StringField(label='Insurance Name')
+    submit = SubmitField(label='Submit')
