@@ -1,4 +1,4 @@
-from app.forms import RegistrationForm, LoginForm, GetNameForm, addHospitalForm, addInsuranceForm
+from app.forms import RegistrationForm, LoginForm, GetNameForm, addHospitalForm, addInsuranceForm, FeedbackForm
 
 from flask import render_template, redirect, url_for, request, flash, session
 from app import myapp_obj

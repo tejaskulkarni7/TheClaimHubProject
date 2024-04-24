@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, RadioField
+from wtforms import StringField, PasswordField, SubmitField, RadioField, TextAreaField
 from wtforms.validators import InputRequired, Length, EqualTo, Email, DataRequired, ValidationError
 
 
@@ -52,3 +52,7 @@ class addInsuranceForm(FlaskForm):
     name = StringField(label='Insurance Company Name')
     phone_number = StringField(label='Phone Number')
     submit = SubmitField(label='Add Insurance')
+
+class FeedbackForm(FlaskForm):
+    feedback = TextAreaField('Feedback', validators=[DataRequired(message="Feedback is required")])
+    submit = SubmitField(label='Submit')
