@@ -41,3 +41,14 @@ class GetNameForm(FlaskForm):
     hospital_name = StringField(label='Hospital Name')
     insurance_name = StringField(label='Insurance Name')
     submit = SubmitField(label='Submit')
+
+class addHospitalForm(FlaskForm):
+    name = StringField(label='Hospital Name')
+    address = StringField(label='Address')
+    phone_number = StringField(label='Phone Number')
+    submit = SubmitField(label='Add Hospital')
+
+class addInsuranceForm(FlaskForm):
+    name = StringField(label='Insurance Company Name')
+    phone_number = StringField(label='Phone Number')
+    submit = SubmitField(label='Add Insurance')

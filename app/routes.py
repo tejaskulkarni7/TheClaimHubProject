@@ -1,4 +1,4 @@
-from app.forms import RegistrationForm, LoginForm, GetNameForm
+from app.forms import RegistrationForm, LoginForm, GetNameForm, addHospitalForm, addInsuranceForm
 
 from flask import render_template, redirect, url_for, request, flash, session
 from app import myapp_obj
@@ -238,3 +238,88 @@ def profile():
         if request.form.get("changepassword") == "Change Password":
             return redirect(url_for("changepassword"))
     return render_template("profilepage.html")
+
+@myapp_obj.route('/addHospital', methods=["GET", "POST"])
+def addHospital():
+    form = addHospitalForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        address = form.address.data
+        phone_number = form.phone_number.data
+
+        connection.autocommit = False
+
+        try:
+            # Insert hospital data into the database
+            sql = "INSERT INTO hospital (name, address, phone_number) VALUES (%s, %s, %s)"
+            val = (name, address, phone_number)
+            cursor.execute(sql, val)
+            
+            # Retrieve the hospital_id of the newly inserted hospital
+            sql = "SELECT LAST_INSERT_ID()"
+            cursor.execute(sql)
+            hospital_id = cursor.fetchone()[0] # Assuming the hospital_id is the first column in the result
+            
+            # Update the User table to set the hospital_id for the current user
+            sql = "UPDATE User SET hospital_id = %s WHERE id = %s"
+            val = (hospital_id, current_user.id)
+            cursor.execute(sql, val)
+            
+            # Commit the transaction
+            connection.commit()
+        except Exception as e:
+            # Rollback the transaction in case of error
+            connection.rollback()
+            print("Error: ", e)
+        finally:
+            # Ensure the connection is set back to autocommit mode
+            connection.autocommit = True
+
+        flash(f'Success! {name} has been added', category='success')
+        return redirect(url_for('home'))
+    return render_template('addHospital.html', form=form)
+
+from flask import flash, redirect, render_template, url_for
+from flask_login import current_user
+
+@myapp_obj.route('/addInsurance', methods=["GET", "POST"])
+def addInsurance():
+    form = addInsuranceForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        phone_number = form.phone_number.data
+
+        # Start a transaction by setting autocommit to False
+        connection.autocommit = False
+
+        try:
+            # Insert insurance data into the database
+            sql = "INSERT INTO insurance (name, phone_number) VALUES (%s, %s)"
+            val = (name, phone_number)
+            cursor.execute(sql, val)
+            
+            # Retrieve the insurance_id of the newly inserted insurance
+            sql = "SELECT LAST_INSERT_ID()"
+            cursor.execute(sql)
+            insurance_id = cursor.fetchone()[0] # Assuming the insurance_id is the first column in the result
+            
+            # Update the User table to set the insurance_id for the current user
+            sql = "UPDATE User SET insurance_id = %s WHERE id = %s"
+            val = (insurance_id, current_user.id)
+            cursor.execute(sql, val)
+            
+            # Commit the transaction
+            connection.commit()
+
+            flash(f'Success! {name} has been added', category='success')
+            return redirect(url_for('home'))
+        except Exception as e:
+            # Rollback the transaction in case of error
+            connection.rollback()
+            print("Error: ", e)
+            flash('An error occurred while adding insurance.', category='danger')
+        finally:
+            # Ensure the connection is set back to autocommit mode
+            connection.autocommit = True
+
+    return render_template('addInsurance.html', form=form)
