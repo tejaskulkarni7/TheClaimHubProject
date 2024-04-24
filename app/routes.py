@@ -8,32 +8,42 @@ from app.models import User, load_user
 from app.__init__ import connection
 
 cursor = connection.cursor()
-@myapp_obj.route("/", methods=['GET', 'POST'])
+
+
+@myapp_obj.route("/", methods=["GET", "POST"])
 @login_required
 def home():
     user_location_name = None
     if current_user.is_authenticated:
         user_type = current_user.user_type
-        if user_type == 'insurance_provider':
-            users_insurance_id = current_user.insurance_id 
-            cursor.execute("SELECT name FROM insurance WHERE insurance_id = %s", (users_insurance_id,))         # Fetch all claims that are from the same insurance as the current user
+        if user_type == "insurance_provider":
+            users_insurance_id = current_user.insurance_id
+            cursor.execute(
+                "SELECT name FROM insurance WHERE insurance_id = %s",
+                (users_insurance_id,),
+            )  # Fetch all claims that are from the same insurance as the current user
             result = cursor.fetchone()
 
-        elif user_type == 'hospital':
+        elif user_type == "hospital":
             users_hospital_id = current_user.hospital_id
-            cursor.execute("SELECT name FROM hospital WHERE hospital_id = %s", (users_hospital_id,))         # Fetch all claims that are from the same hospital as the current user
+            cursor.execute(
+                "SELECT name FROM hospital WHERE hospital_id = %s", (users_hospital_id,)
+            )  # Fetch all claims that are from the same hospital as the current user
             result = cursor.fetchone()
 
         if result:
             user_location_name = result[0]
 
-    return render_template('home.html', title='Home', user_location_name=user_location_name)
+    return render_template(
+        "home.html", title="Home", user_location_name=user_location_name
+    )
 
-@myapp_obj.route("/signup", methods=['GET', 'POST'])
+
+@myapp_obj.route("/signup", methods=["GET", "POST"])
 def signupPage():
     form = RegistrationForm(cursor=cursor)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         if form.validate_on_submit():
             # Get data from the form
             username = form.username.data
@@ -47,25 +57,48 @@ def signupPage():
 
             # Insert user data into the database
             sql = "INSERT INTO User (username, firstname, lastname, email_address, password_hash, user_type) VALUES (%s, %s, %s, %s, %s, %s)"
-            val = (username, firstname, lastname, email_address, password_hash, user_type)
+            val = (
+                username,
+                firstname,
+                lastname,
+                email_address,
+                password_hash,
+                user_type,
+            )
             cursor.execute(sql, val)
             connection.commit()
             user_id = cursor.lastrowid
 
             # Create an instance of the User class
-            user = User(user_id=user_id, username=username, firstname = firstname, lastname = lastname, email_address=email_address, password_hash=password_hash, user_type=user_type, insurance_id=None, hospital_id=None)
+            user = User(
+                user_id=user_id,
+                username=username,
+                firstname=firstname,
+                lastname=lastname,
+                email_address=email_address,
+                password_hash=password_hash,
+                user_type=user_type,
+                insurance_id=None,
+                hospital_id=None,
+            )
 
             # Log in the user
             login_user(user)
-            flash(f'Account created successfully! You are now logged in as {username}', category='success')
-            return redirect(url_for('getname'))
-        if form.errors != {}: #If there are errors in signing up
+            flash(
+                f"Account created successfully! You are now logged in as {username}",
+                category="success",
+            )
+            return redirect(url_for("getname"))
+        if form.errors != {}:  # If there are errors in signing up
             for err_msg in form.errors.values():
-                flash(f'There was an error with creating a user: {err_msg}', category='danger') #flash appropriate error message
-    return render_template('signup.html', form=form, title='Signup')
+                flash(
+                    f"There was an error with creating a user: {err_msg}",
+                    category="danger",
+                )  # flash appropriate error message
+    return render_template("signup.html", form=form, title="Signup")
 
 
-@myapp_obj.route("/login", methods=['GET', 'POST'])
+@myapp_obj.route("/login", methods=["GET", "POST"])
 def loginPage():
     form = LoginForm()
     if form.validate_on_submit():
@@ -76,17 +109,31 @@ def loginPage():
         user = cursor.fetchone()
 
         if user and check_password_hash(user[5], password):
-            login_user(User(user_id=user[0], username=user[1], firstname=user[2], lastname=user[3], email_address=user[4], password_hash=user[5], insurance_id=user[7], hospital_id=user[8]))
+            login_user(
+                User(
+                    user_id=user[0],
+                    username=user[1],
+                    firstname=user[2],
+                    lastname=user[3],
+                    email_address=user[4],
+                    password_hash=user[5],
+                    insurance_id=user[7],
+                    hospital_id=user[8],
+                )
+            )
 
-            flash(f'Success logging in, Logged in as: {username}', category='success')
-            return redirect(url_for('home'))
+            flash(f"Success logging in, Logged in as: {username}", category="success")
+            return redirect(url_for("home"))
         else:
-            flash('Username or Password does not match! Please try again', category='danger')
+            flash(
+                "Username or Password does not match! Please try again",
+                category="danger",
+            )
 
-    return render_template('login.html', title='Login', form=form)
+    return render_template("login.html", title="Login", form=form)
 
 
-@myapp_obj.route('/getname', methods=["GET", "POST"])
+@myapp_obj.route("/getname", methods=["GET", "POST"])
 def getname():
     form = GetNameForm()
     insurance_names = []
@@ -101,8 +148,10 @@ def getname():
             sql = "SELECT insurance_id FROM insurance WHERE name = %s"
             val = (insurance_name,)
             cursor.execute(sql, val)
-            result = cursor.fetchone() # Store the result in a variable
-            insurance_id = result[0] if result else None # Check if result is not None before accessing its elements
+            result = cursor.fetchone()  # Store the result in a variable
+            insurance_id = (
+                result[0] if result else None
+            )  # Check if result is not None before accessing its elements
 
             if insurance_id:
                 sql = "UPDATE User SET insurance_id = %s WHERE id = %s"
@@ -115,8 +164,10 @@ def getname():
             sql = "SELECT hospital_id FROM hospital WHERE name = %s"
             val = (hospital_name,)
             cursor.execute(sql, val)
-            result = cursor.fetchone() # Store the result in a variable
-            hospital_id = result[0] if result else None # Check if result is not None before accessing its elements
+            result = cursor.fetchone()  # Store the result in a variable
+            hospital_id = (
+                result[0] if result else None
+            )  # Check if result is not None before accessing its elements
 
             if hospital_id:
                 sql = "UPDATE User SET hospital_id = %s WHERE id = %s"
@@ -124,9 +175,9 @@ def getname():
                 cursor.execute(sql, val)
                 connection.commit()
 
-        flash(f'Success!', category='success')
-        return redirect(url_for('home'))
-    
+        flash(f"Success!", category="success")
+        return redirect(url_for("home"))
+
     cursor.execute("SELECT name FROM insurance")
     # Fetch all rows and store the names in the insurance_names list
     for row in cursor.fetchall():
@@ -135,14 +186,21 @@ def getname():
     # Fetch all rows and store the names in the hospital_names list
     for row in cursor.fetchall():
         hospital_names.append(row[0])
-    return render_template("getname.html", form=form, insurance_names=insurance_names, hospital_names=hospital_names)
+    return render_template(
+        "getname.html",
+        form=form,
+        insurance_names=insurance_names,
+        hospital_names=hospital_names,
+    )
+
 
 @myapp_obj.context_processor
 def base():
     form = GetNameForm()
     return dict(form=form)
 
-@myapp_obj.route('/infopage', methods=["GET", "POST"])
+
+@myapp_obj.route("/infopage", methods=["GET", "POST"])
 @login_required
 def infopage():
     form = FeedbackForm()
@@ -154,6 +212,29 @@ def infopage():
         val = (user_id, feedback_content)
         cursor.execute(sql, val)
         connection.commit()
-        flash("Feedback received!", category='success')
+        flash("Feedback received!", category="success")
         return render_template("home.html", form=form)
     return render_template("infopage.html", form=form)
+
+
+@myapp_obj.route("/profilepage", methods=["GET", "POST"])
+@login_required
+def profile():
+    if request.method == "POST":
+        if (
+            request.form.get("deleteprofile") == "Delete Profile"
+        ):  # if the delete profile button is clicked
+            userid2 = request.form.get("userid2")
+            cursor.execute("SELECT * FROM User WHERE id = %s", (userid2,))
+            user = cursor.fetchone()
+            if user:
+                user_id = user[0]  # Assuming the user ID is at index 0
+                cursor.execute("DELETE FROM User WHERE id = %s", (user_id,))
+                connection.commit()
+                flash("Profile Deleted!", category="success")
+                return redirect(url_for("logoutPage"))  # flash and redirect
+            else:
+                flash("User not found!", category="danger")
+        if request.form.get("changepassword") == "Change Password":
+            return redirect(url_for("changepassword"))
+    return render_template("profilepage.html")

@@ -1,0 +1,37 @@
+{% extends 'base.html'%}
+
+<body>
+
+    {%block content%}
+    <center>
+        <h1>Welcome, {{ current_user.firstname }}!</h1>
+        <br>
+
+        <div>
+            <p>Email Address: {{ current_user.email_address }}</p>
+            <p>Account Type: {{ current_user.user_type }}</p>
+        </div>
+
+        <div class="changediv">
+            <br>
+
+            <form action="" method="post">
+                <input type="hidden" name="userid2" value="{{current_user.id}}">
+                <input type="submit" class="text-center shadow-lg p-2 mb-0 bg-body rounded btn btn-dark"
+                    value="Change Password" name='changepassword' />
+            </form>
+            <br>
+            <form action="" method="post">
+                <input type="hidden" name="userid2" value="{{current_user.id}}">
+                <input type="submit" class="text-center shadow-lg p-2 mb-0 bg-body rounded btn btn-dark"
+                    value="Delete Profile" name='deleteprofile' />
+            </form>
+    </center>
+
+    </div>
+    </div>
+
+    {%endblock content%}
+</body>
+
+</html>
