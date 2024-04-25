@@ -117,6 +117,7 @@ def loginPage():
                     lastname=user[3],
                     email_address=user[4],
                     password_hash=user[5],
+                    user_type=user[6],
                     insurance_id=user[7],
                     hospital_id=user[8],
                 )
@@ -323,3 +324,9 @@ def addInsurance():
             connection.autocommit = True
 
     return render_template('addInsurance.html', form=form)
+
+@myapp_obj.route('/logout')
+def logoutPage():
+    logout_user()
+    flash("You have been logged out!", category='info')
+    return redirect(url_for("home"))
