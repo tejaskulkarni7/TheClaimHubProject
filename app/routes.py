@@ -1,4 +1,4 @@
-from app.forms import RegistrationForm, LoginForm, GetNameForm, addHospitalForm, addInsuranceForm, FeedbackForm
+from app.forms import RegistrationForm, LoginForm, PasswordForm, GetNameForm, addHospitalForm, addInsuranceForm, FeedbackForm
 
 from flask import render_template, redirect, url_for, request, flash, session
 from app import myapp_obj
@@ -132,6 +132,27 @@ def loginPage():
             )
 
     return render_template("login.html", title="Login", form=form)
+
+@myapp_obj.route('/changepassword', methods=["GET", "POST"])
+@login_required
+def changepassword():
+    form = PasswordForm()
+    if form.validate_on_submit():
+        currentpass = form.currentpass.data
+        newpass = form.newpass.data
+        userid2 = request.form.get('userid2')
+        cursor.execute("SELECT * FROM User WHERE id = %s", (userid2,))
+        user = cursor.fetchone()
+        if user and check_password_hash(user[5], currentpass): # Assuming password_hash is at index 3
+            password_hash = generate_password_hash(newpass)
+            cursor.execute("UPDATE User SET password_hash = %s WHERE id = %s", (password_hash, userid2,))
+            connection.commit()
+            flash("Your Password Has Been Changed", category='success')
+            return render_template("changepassword.html", form=form)
+        else:
+            flash("Incorrect Password", category='danger')
+            return render_template("changepassword.html", form=form)
+    return render_template("changepassword.html", form=form)
 
 
 @myapp_obj.route("/getname", methods=["GET", "POST"])
