@@ -421,3 +421,13 @@ def claimpage():
         patient_names = {}
 
     return render_template('claimpage.html', claims=claims, patient_names=patient_names, hospital_names_dict=hospital_names_dict, insurance_names_dict=insurance_names_dict, procedure_names_dict=procedure_names_dict)
+
+@myapp_obj.route('/patientspage', methods=["GET", "POST"])
+@login_required
+def patientspage():
+    # Execute the query to fetch all patients
+    cursor.execute("SELECT * FROM patient")
+    patients = cursor.fetchall()
+
+    # Render the template with the patients data
+    return render_template('patientspage.html', patients=patients)
