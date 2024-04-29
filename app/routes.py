@@ -355,7 +355,6 @@ def logoutPage():
 @myapp_obj.route('/claimpage', methods=["GET", "POST"])
 @login_required
 def claimpage():
-
     hospital_names_dict = {}
     user_type = current_user.user_type #Current users hospital/insurance type & id for query
     if user_type == 'insurance_provider':
@@ -419,8 +418,60 @@ def claimpage():
         patient_names = {patient[0]: patient[1] for patient in patients}
     else:
         patient_names = {}
+    
 
-    return render_template('claimpage.html', claims=claims, patient_names=patient_names, hospital_names_dict=hospital_names_dict, insurance_names_dict=insurance_names_dict, procedure_names_dict=procedure_names_dict)
+    cursor.execute("""
+        SELECT comment.comment_id, comment.user_id, comment.claim_id, comment.comment_time, comment.comment_content, User.username
+        FROM comment
+        JOIN User ON comment.user_id = User.id
+    """)
+    comments = cursor.fetchall()
+
+    if request.method == 'POST':
+        if request.form.get('deleteclaim') == 'Delete Claim': #if the delete profile button is clicked
+            claim_id = request.form.get('claim_id')
+            cursor.execute("SELECT * FROM claim WHERE claim_id = %s", (claim_id,))
+            claim = cursor.fetchone()
+            if claim:
+                claim_id = claim[0]  # Assuming the user ID is at index 0
+
+                #delete the claim (foreign key constraint bypassed intentionally)
+                cursor.execute("DELETE FROM claim WHERE claim_id = %s", (claim_id,))
+                connection.commit()
+
+                flash('Claim Deleted!', category='success')
+                return redirect(url_for('claimpage')) #flash and redirect
+            else:
+                flash('Claim not found!', category='danger')
+        if request.form.get('updatestatus') == 'Update Status': # Check if the update status button is clicked
+            claim_id = request.form.get('claim_id')
+            new_status = request.form.get('status') # Get the new status from the form
+            # Check if the claim exists
+            cursor.execute("SELECT * FROM claim WHERE claim_id = %s", (claim_id,))
+            claim = cursor.fetchone()
+            if claim:
+                # Update the claim's status
+                cursor.execute("UPDATE claim SET status = %s WHERE claim_id = %s", (new_status, claim_id))
+                connection.commit()
+                flash('Claim status updated successfully!', category='success')
+                return redirect(url_for('claimpage')) # Redirect to the claim page
+            else:
+                flash('Claim not found!', category='danger')
+                return redirect(url_for('claimpage')) # Redirect to the claim page
+        if request.form.get('addcomment') == 'Add Comment': # Check if the update status button is clicked
+            claim_id = request.form.get('claim_id')
+            comment_content = request.form.get('comment') # Get the new status from the form
+            if comment_content:
+                sql = "INSERT INTO comment (user_id, claim_id, comment_content) VALUES (%s, %s, %s)"
+                val = (current_user.id, claim_id, comment_content)
+                cursor.execute(sql, val)
+                connection.commit()
+                flash('Comment Added!', category='success')
+            else:
+                flash('Error!', category='danger')
+            return redirect(url_for('claimpage'))
+
+    return render_template('claimpage.html', claims=claims, patient_names=patient_names, hospital_names_dict=hospital_names_dict, insurance_names_dict=insurance_names_dict, procedure_names_dict=procedure_names_dict, comments=comments)
 
 @myapp_obj.route('/patientspage', methods=["GET", "POST"])
 @login_required

@@ -45,6 +45,28 @@ Claims
             border-radius: 5px;
             cursor: pointer;
         }
+        /* Style for the "Update Status" and "Delete Claim" buttons */
+        .update-status-btn, .delete-claim-btn {
+            position: absolute;
+            top: 50px; /* Adjust as needed */
+            right: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .update-status-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .delete-claim-btn {
+            background-color: red;
+            color: white;
+        }
+        .comments-btn {
+            background-color: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body> 
@@ -83,6 +105,17 @@ Claims
         More Info
       </button>
       <!-- Update Status Button -->
+      <button type="button" class="btn update-status-btn" style="position: absolute; top: 60px; right: 10px;" data-toggle="modal" data-target="#updateStatusModal{{ claim[0] }}">
+        Update Status
+      </button>
+      <!-- Delete Claim Button -->
+      <button type="button" class="btn comments-btn" style="position: absolute; top: 115px; right: 10px; height: 37px;" data-toggle="modal" data-target="#commentsModal{{ claim[0] }}">
+        Comments
+      </button>
+      <!-- Delete Claim Button -->
+      <button type="button" class="btn delete-claim-btn" style="position: absolute; top: 165px; right: 10px; height: 37px;" data-toggle="modal" data-target="#deleteClaimModal{{ claim[0] }}">
+        Delete
+      </button>
       <!-- Modal for More Info -->
       <div class="modal fade" id="myModal{{ claim[0] }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <!-- Modal content -->
@@ -106,6 +139,106 @@ Claims
           </div>
         </div>
       </div>
+      <!-- Modal for Update Status -->
+      <div class="modal fade" id="updateStatusModal{{ claim[0] }}" tabindex="-1" role="dialog" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+        <!-- Modal content -->
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="updateStatusModalLabel">Update Status</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">              
+              <form action="{{ url_for('claimpage')}}" method="post">
+                <!-- Include the claim_id as a hidden input field -->
+                <input type="hidden" name="claim_id" value="{{ claim[0] }}">
+                <!-- Dropdown for status selection -->
+                <div class="form-group">
+                   <label for="statusSelect">Status</label>
+                   <select class="form-control" id="statusSelect" name="status">
+                     <option value="Pending" selected>Pending</option>
+                     <option value="Rejected">Rejected</option>
+                     <option value="Approved">Approved</option>
+                   </select>
+                </div>
+                <div class="d-flex justify-content-center align-items-center" style="margin-top: 10px; margin-bottom: 20px;">
+                   <input type="submit" value="Update Status" name="updatestatus">
+                </div>
+               </form>
+               
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal for Delete Claim -->
+      <div class="modal fade" id="deleteClaimModal{{ claim[0] }}" tabindex="-1" role="dialog" aria-labelledby="deleteClaimModalLabel" aria-hidden="true">
+        <!-- Modal content -->
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="deleteClaimModalLabel">Delete Claim</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                  Are you sure you want to delete this claim?
+              </div>
+              <!-- Form to Delete Claim -->
+              <form action="{{ url_for('claimpage')}}" method="post">
+                  <input type="hidden" name="claim_id" value="{{ claim[0] }}">
+                  <div class="d-flex justify-content-center align-items-center" style="margin-top: 10px; margin-bottom: 20px;">
+                      <input type="submit" value="Delete Claim" name="deleteclaim">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+            <!-- Modal for Comments -->
+      <div class="modal fade" id="commentsModal{{ claim[0] }}" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
+        <!-- Modal content -->
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentsModalLabel">Comments</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Display existing comments here -->
+                    <!-- Example: -->
+                    <p>Existing Comments:</p>
+                    <div class="comments">
+                      {% for comment in comments %}
+                          {% if comment[2] == claim[0] %}
+                              <p>{{ comment[4] }} - {{ comment[5] }} ({{ comment[3].strftime('%Y-%m-%d') }})</p>
+                          {% endif %}
+                      {% endfor %}
+                    </div>
+                    <!-- Form to Add New Comment -->
+                    <form action="{{ url_for('claimpage') }}" method="post">
+                        <!-- Include the claim_id as a hidden input field -->
+                        <input type="hidden" name="claim_id" value="{{ claim[0] }}">
+                        <div class="form-group">
+                            <label for="comment">Add a Comment:</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+                        </div>
+                        <div class="d-flex justify-content-center align-items-center" style="margin-top: 10px; margin-bottom: 20px;">
+                            <input type="submit" value="Add Comment" name="addcomment">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+      </div>
+
     </div>
     {% endfor %}
 </ul>
