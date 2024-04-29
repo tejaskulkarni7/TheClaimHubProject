@@ -351,3 +351,73 @@ def logoutPage():
     logout_user()
     flash("You have been logged out!", category='info')
     return redirect(url_for("home"))
+
+@myapp_obj.route('/claimpage', methods=["GET", "POST"])
+@login_required
+def claimpage():
+
+    hospital_names_dict = {}
+    user_type = current_user.user_type #Current users hospital/insurance type & id for query
+    if user_type == 'insurance_provider':
+        users_insurance_id = current_user.insurance_id 
+        cursor.execute("SELECT * FROM claim WHERE insurance_id = %s", (users_insurance_id,))         # Fetch all claims that are from the same insurance as the current user
+        claims = cursor.fetchall()
+        cursor.execute("SELECT hospital_id FROM claim WHERE insurance_id = %s", (users_insurance_id,))
+        hospital_ids = cursor.fetchall()
+        for row in hospital_ids:
+            hospital_id = row[0]  # Extracting the hospital ID from the fetched row
+            cursor.execute("SELECT name FROM hospital WHERE hospital_id = %s", (hospital_id,))
+            name = cursor.fetchone()
+            if name:
+                hospital_names_dict[hospital_id] = name[0]
+    insurance_names_dict = {} 
+    if user_type == 'hospital':
+        users_hospital_id = current_user.hospital_id
+        cursor.execute("SELECT * FROM claim WHERE hospital_id = %s", (users_hospital_id,))         # Fetch all claims that are from the same hospital as the current user
+        claims = cursor.fetchall()
+        cursor.execute("SELECT insurance_id FROM claim WHERE hospital_id = %s", (users_hospital_id,))
+        insurance_ids = cursor.fetchall()
+        for row in insurance_ids:
+            insurance_id = row[0]  # Extracting the insurance ID from the fetched row
+            cursor.execute("SELECT name FROM insurance WHERE insurance_id = %s", (insurance_id,))
+            name = cursor.fetchone()
+            if name:
+                insurance_names_dict[insurance_id] = name[0]
+
+    # Initialize a dictionary to store procedure names by their IDs
+    procedure_names_dict = {}
+
+    # Execute a single query to fetch all procedure names tied to each claim's procedure_id
+    cursor.execute("""
+        SELECT c.procedure_id, p.name
+        FROM claim c
+        JOIN `medical_procedure` p ON c.procedure_id = p.procedure_id
+    """)
+
+    # Fetch all results from the query
+    results = cursor.fetchall()
+
+    # Loop through each result to populate the dictionary
+    for row in results:
+        procedure_id = row[0] # Extracting the procedure ID from the fetched row
+        name = row[1] # Extracting the procedure name from the fetched row
+        procedure_names_dict[procedure_id] = name
+
+    # Extract all unique patient IDs from the claims
+    patient_ids = list(set(claim[3] for claim in claims))  # Assuming patient_id is at index 3
+    
+    # Fetch all patients whose IDs are in the list of patient IDs
+    if patient_ids:
+        placeholders = ', '.join(['%s'] * len(patient_ids))
+        cursor.execute(f"SELECT * FROM patient WHERE patient_id IN ({placeholders})", tuple(patient_ids))
+        patients = cursor.fetchall()
+    else:
+        patients = []
+    
+    # Create a dictionary mapping patient IDs to patient names
+    if patients:
+        patient_names = {patient[0]: patient[1] for patient in patients}
+    else:
+        patient_names = {}
+
+    return render_template('claimpage.html', claims=claims, patient_names=patient_names, hospital_names_dict=hospital_names_dict, insurance_names_dict=insurance_names_dict, procedure_names_dict=procedure_names_dict)

@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}
+Claims
+{% endblock title %}
+
+{% block content %}
+<head>
+    <style>
+        .status-box {
+            display: inline-block;
+            padding: 2px 5px; /* Adjust padding as needed */
+            border-radius: 3px; /* Optional: for rounded corners */
+            margin-top: 5px; /* Optional: to add some space above the status box */
+        }
+
+        .status-rejected {
+            background-color: red;
+            color: white;
+        }
+
+        .status-pending {
+            background-color: yellow;
+            color: black;
+        }
+
+        .status-approved {
+            background-color: green;
+            color: white;
+        }
+
+        /* Style for the button container */
+        .button-container {
+            position: relative;
+            height: 60px; /* Adjust as needed */
+        }
+        /* Style for the "Add Claim" button */
+        .add-claim-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body> 
+<div style="padding-top: 15px;"></div>
+<ul style="list-style-type: none; flex-wrap: wrap; color: black">
+    {% for claim in claims %}
+    <div style="
+        border-style: solid;
+        border-color: #646464;
+        border-radius: 5px;
+        background-color: white;
+        width: 750px;
+        height: 250px;
+        margin-bottom: 10px;
+        position: relative;
+        ">
+      <li>
+        <p>Patient Name: {{ patient_names[claim[3]] }}</p>
+        <p>Date: {{ claim[6] }}</p>
+        <p>Procedure: {{ procedure_names_dict[claim[4]] }}</p>
+
+        {% if current_user.user_type == "insurance_provider" %}
+            <p>Hospital: {{ hospital_names_dict[claim[1]] }}</p>
+        {% endif %}
+
+        {% if current_user.user_type == "hospital" %}
+            <p>Insurance: {{ insurance_names_dict[claim[2]] }}</p>
+        {% endif %}
+
+        <p>Status: <span class="status-box {{ 'status-rejected' if claim[5] == 'Rejected' else 'status-pending' if claim[5] == 'Pending' else 'status-approved' }}">{{ claim[5] }}</span></p>
+
+      </li>
+      
+      <!-- Button to open modal -->
+      <button type="button" class="btn btn-primary" style="position: absolute; top: 10px; right: 10px;" data-toggle="modal" data-target="#myModal{{ claim[0] }}">
+        More Info
+      </button>
+      <!-- Update Status Button -->
+      <!-- Modal for More Info -->
+      <div class="modal fade" id="myModal{{ claim[0] }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <!-- Modal content -->
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="myModalLabel">Additional Information</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Claim ID: {{ claim[0] }}</p>
+              <p>Covered Amount: {{ claim[8] }}</p>
+              <p>Deductible Amount: {{ claim[9] }}</p>
+              <p>Description: {{ claim[10] }}</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+</ul>
+</body>
+{% endblock content %}
+</html>
