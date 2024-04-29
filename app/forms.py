@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, RadioField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, RadioField, TextAreaField, IntegerField, DateField, DecimalField
 from wtforms.validators import InputRequired, Length, EqualTo, Email, DataRequired, ValidationError
 
 
@@ -61,3 +61,14 @@ class PasswordForm(FlaskForm):
     currentpass = PasswordField(label='Enter Current Password', validators=[InputRequired(message="Password required"), DataRequired()])
     newpass = PasswordField(label='Enter New Password', validators=[InputRequired(message="Password required"), Length(min=4, max=32, message="Password must be between 4 and 32 characters"), DataRequired()])
     submit = SubmitField(label='Submit')
+
+class addClaimForm(FlaskForm):
+    patient_id = IntegerField(label='Patient ID', validators=[InputRequired(message="Patient ID Required"), DataRequired()])
+    procedure_id = IntegerField(label='Procedure ID', validators=[InputRequired(message="Procedure ID Required"), DataRequired()])
+    hospital_name = StringField(label='Hospital Name')
+    insurance_name = StringField(label='Insurance Name')
+    date = DateField(label='Date of Procedure', validators=[InputRequired(message="Date Required Required"), DataRequired()])
+    covered_amount = DecimalField(label='Covered Amount', validators=[InputRequired(message="Covered Amount Required"), DataRequired()])
+    total_amount = DecimalField(label='Total Amount', validators=[InputRequired(message="Total Amount Required"), DataRequired()])
+    description = TextAreaField(label='Description')
+    submit = SubmitField(label='Add Claim')

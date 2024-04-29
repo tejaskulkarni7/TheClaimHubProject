@@ -1,0 +1,96 @@
+{% extends 'base.html'%}
+{% block title%}
+Add Claim
+{%endblock title%}
+
+{%block content%}
+<body> 
+<!--SIGN UP FORM-->
+<section class="vh-100 gradient-custom">
+      <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card bg-dark text-white" style="border-radius: 1rem; width:150%; margin-left: -130px; ">
+              <div class="card-body p-5 text-center"> 
+              <div class="mb-md-5 mt-md-4 pb-5">
+                  <h2 class="shadow-lg p-3 mb-5 bg-body rounded" class="text-uppercase text-center mb-5">Add New Claim</h2>
+
+                  <form method="POST" class="form-register" style="color:white">
+                      {{ form.hidden_tag() }}
+                      
+
+
+                      <div class="row">
+                        <div class="col-md-6">
+                            {{ form.patient_id(class="shadow-lg p-3 mb-3 form-control", placeholder="Patient ID") }}
+                            {{ form.patient_id.label() }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.procedure_id(class="shadow-lg p-3 mb-3 form-control", placeholder="Procedure ID") }}
+                            {{ form.procedure_id.label() }}
+                        </div>
+                    </div>
+                       
+                      <input type="date" name="date" class="shadow-lg p-3 mb-3 form-control" placeholder="Date of Procedure">
+                      <label for="date">Date of Procedure</label>
+                      <br> <br>
+                  
+                        {% if current_user.user_type == "insurance_provider" %}
+                            
+                            <select name="hospital_name" id="hospital_names">
+                                {% for name in hospital_names %}
+                                    <option value="{{ name }}">{{ name }}</option>
+                                {% endfor %}    
+                            </select>
+                            <p>Hospital Name</p>
+                            <br>
+                            <br>
+                        {% endif %}
+                        {% if current_user.user_type == "hospital" %}
+                            
+                            <select name="insurance_name" id="insurance_names">
+                                {% for name in insurance_names %}
+                                    <option value="{{ name }}">{{ name }}</option>
+                                {% endfor %}    
+                            </select>
+                            <p>Insurance Name</p>
+                            <br>
+                            <br>
+                        {% endif %}
+                    
+                        
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.covered_amount(class="shadow-lg p-3 mb-2 form-control", placeholder="Covered Amount") }}
+                            {{ form.covered_amount.label() }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.total_amount(class="shadow-lg p-3 mb-2 form-control", placeholder="Total Amount") }}
+                            {{ form.total_amount.label() }}
+                        </div>
+                    </div>
+                    <br>
+                    <br>
+                    {{ form.description(class="shadow-lg p-3 mb-2 form-control", placeholder="Description") }}
+                    {{ form.description.label() }}
+                    
+                      <div class="d-flex justify-content-center">
+                        {{ form.submit(class="shadow-lg p-2 mb-3 bg-body btn btn-light btn-lg px-5") }}
+                      </div>
+                      <br>
+                      
+                      <p class="shadow-lg p-3 mb-0 bg-body rounded" class="mb-0"><a href="{{ url_for('claimpage') }}"
+                          class="text-white-50 fw-bold"><u>Cancel</u></a></p>
+
+                  </form>
+
+                  </div>
+              </div>
+              </div>
+          </div>
+          </div>
+      </div>
+</section>
+</body>
+{%endblock content%}
+</html>

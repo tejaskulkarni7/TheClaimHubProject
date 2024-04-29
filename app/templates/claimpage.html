@@ -70,6 +70,10 @@ Claims
     </style>
 </head>
 <body> 
+<div class="button-container">
+    <!-- "Add Claim" Button -->
+    <a href="{{ url_for('addclaim') }}" class="add-claim-btn">Add Claim</a>
+</div>
 <div style="padding-top: 15px;"></div>
 <ul style="list-style-type: none; flex-wrap: wrap; color: black">
     {% for claim in claims %}

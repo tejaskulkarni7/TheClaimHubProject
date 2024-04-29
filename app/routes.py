@@ -1,4 +1,4 @@
-from app.forms import RegistrationForm, LoginForm, PasswordForm, GetNameForm, addHospitalForm, addInsuranceForm, FeedbackForm
+from app.forms import RegistrationForm, LoginForm, PasswordForm, GetNameForm, addHospitalForm, addInsuranceForm, FeedbackForm, addClaimForm
 
 from flask import render_template, redirect, url_for, request, flash, session
 from app import myapp_obj
@@ -482,3 +482,69 @@ def patientspage():
 
     # Render the template with the patients data
     return render_template('patientspage.html', patients=patients)
+
+
+@myapp_obj.route('/addclaim', methods=["GET", "POST"])
+@login_required
+def addclaim():
+    form = addClaimForm()
+    insurance_names = []
+    hospital_names = []
+
+    if form.validate_on_submit():
+        insurance_name = form.insurance_name.data
+        hospital_name = form.hospital_name.data
+        patient_id = form.patient_id.data
+        procedure_id = form.procedure_id.data
+        date = form.date.data
+        total_amount = form.total_amount.data
+        covered_amount = form.covered_amount.data
+        description = form.description.data
+        #userid = current_user.id
+        status = "Pending"
+
+        if current_user.user_type == "insurance_provider":
+            insurance_id = current_user.insurance_id
+            sql = "SELECT hospital_id FROM hospital WHERE name = %s"
+            val = (hospital_name,)
+            cursor.execute(sql, val)
+            result = cursor.fetchone() # Store the result in a variable
+            hospital_id = result[0]
+        if current_user.user_type == "hospital":
+            hospital_id = current_user.hospital_id
+            sql = "SELECT insurance_id FROM insurance WHERE name = %s"
+            val = (insurance_name,)
+            cursor.execute(sql, val)
+            result = cursor.fetchone() # Store the result in a variable
+            insurance_id = result[0]
+
+        #sql = "INSERT INTO claim (hospital_id, insurance_id, patient_id, procedure_id, status, date, total_amount, covered_amount, description) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        #val = (hospital_id, insurance_id, patient_id, procedure_id, status, date, total_amount, covered_amount, description)
+
+        connection.autocommit = False
+        try:
+            sql = "INSERT INTO claim (hospital_id, insurance_id, status, patient_id, procedure_id, date, covered_amount, total_amount, description) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            val = (hospital_id, insurance_id, status, patient_id, procedure_id, date, covered_amount, total_amount, description, )
+            cursor.execute(sql, val)
+            connection.commit()
+
+        except Exception as e:
+            # Rollback the transaction in case of error
+            connection.rollback()
+            print("Error: ", e)
+        finally:
+            # Ensure the connection is set back to autocommit mode
+            connection.autocommit = True
+
+        flash(f"Claim Added!", category='success')
+        return redirect(url_for('claimpage'))
+
+    cursor.execute("SELECT name FROM insurance")
+    # Fetch all rows and store the names in the insurance_names list
+    for row in cursor.fetchall():
+        insurance_names.append(row[0])
+    cursor.execute("SELECT name FROM hospital")
+    # Fetch all rows and store the names in the hospital_names list
+    for row in cursor.fetchall():
+        hospital_names.append(row[0])
+    return render_template("addclaim.html", form=form, insurance_names=insurance_names, hospital_names=hospital_names)
