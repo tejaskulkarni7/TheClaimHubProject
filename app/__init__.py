@@ -12,7 +12,7 @@ login_manager.login_view = "loginPage"  # for login
 login_manager.login_message_category = "info"  # for login
 
 connection = mysql.connector.connect(
-    host="localhost", password="abb41817", user="root", database="insurance"
+    host="localhost", password="Hello123!", user="root", database="insurance"
 )
 
 
