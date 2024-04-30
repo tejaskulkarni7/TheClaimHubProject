@@ -4,28 +4,52 @@ Patients
 {% endblock title %}
 
 {% block content %}
-<body> 
-<div style="padding-top: 15px;"></div>
-<table style="width: 100%; border-collapse: collapse; color: black; margin-top: 35px;">
-    <thead>
-        <tr>
-            <th>Patient ID</th>
-            <th>Patient Name</th>
-            <th>Date of Birth</th>
-            <th>Contact</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for patient in patients %}
-        <tr style="background-color: white; border: 1px solid #ddd; padding: 10px 0;">
-            <td>{{ patient[0] }}</td>
-            <td>{{ patient[1] }}</td>
-            <td>{{ patient[2] }}</td>
-            <td>{{ patient[3] }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+<body>
+
+    <head>
+        <style>
+            /* Style for the "Add Claim" button */
+            .add-patient-btn {
+                position: absolute;
+                top: 70px;
+                right: 10px;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <div style="padding-top: 15px;"></div>
+    <div class="button-container">
+        <!-- "Add Claim" Button -->
+        <a href="{{ url_for('addpatient') }}" class="add-patient-btn">Add Patient</a>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; color: black; margin-top: 35px;">
+        <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Patient Name</th>
+                <th>Date of Birth</th>
+                <th>Contact</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr style="background-color: white; border: 1px solid #ddd; padding: 10px 0;">
+                <td>{{ patient[0] }}</td>
+                <td>{{ patient[1] }}</td>
+                <td>{{ patient[2] }}</td>
+                <td>{{ patient[3] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
 </body>
 {% endblock content %}
+
 </html>
