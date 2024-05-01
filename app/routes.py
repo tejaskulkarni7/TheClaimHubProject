@@ -65,39 +65,15 @@ def signupPage():
             # Hash the password before storing it
             password_hash = generate_password_hash(password)
 
-            # Insert user data into the database
-            sql = "INSERT INTO User (username, firstname, lastname, email_address, password_hash, user_type) VALUES (%s, %s, %s, %s, %s, %s)"
-            val = (
-                username,
-                firstname,
-                lastname,
-                email_address,
-                password_hash,
-                user_type,
-            )
-            cursor.execute(sql, val)
-            connection.commit()
-            user_id = cursor.lastrowid
 
-            # Create an instance of the User class
-            user = User(
-                user_id=user_id,
-                username=username,
-                firstname=firstname,
-                lastname=lastname,
-                email_address=email_address,
-                password_hash=password_hash,
-                user_type=user_type,
-                insurance_id=None,
-                hospital_id=None,
-            )
-
-            # Log in the user
-            login_user(user)
-            flash(
-                f"Account created successfully! You are now logged in as {username}",
-                category="success",
-            )
+            session['registration_data'] = {
+            'username': username,
+            'email_address': email_address,
+            'firstname': firstname,
+            'lastname': lastname,
+            'password_hash': password_hash,
+            'user_type': user_type
+            }
             return redirect(url_for("getname"))
         if form.errors != {}:  # If there are errors in signing up
             for err_msg in form.errors.values():
@@ -179,10 +155,45 @@ def getname():
     form = GetNameForm()
     insurance_names = []
     hospital_names = []
+    registration_data = session.get('registration_data')
+    user_type = registration_data.get('user_type')
     if form.validate_on_submit():
         insurance_name = form.insurance_name.data
         hospital_name = form.hospital_name.data
-        userid = current_user.id
+        username = registration_data.get('username')
+        email_address = registration_data.get('email_address')
+        firstname = registration_data.get('firstname')
+        lastname = registration_data.get('lastname')
+        password_hash = registration_data.get('password_hash')
+
+
+        # Insert user data into the database and log in user
+        sql = "INSERT INTO User (username, firstname, lastname, email_address, password_hash, user_type) VALUES (%s, %s, %s, %s, %s, %s)"
+        val = (
+            username,
+            firstname,
+            lastname,
+            email_address,
+            password_hash,
+            user_type,
+        )
+        cursor.execute(sql, val)
+        connection.commit()
+        user_id = cursor.lastrowid
+
+        # Create an instance of the User class
+        user = User(
+            user_id=user_id,
+            username=username,
+            firstname=firstname,
+            lastname=lastname,
+            email_address=email_address,
+            password_hash=password_hash,
+            user_type=user_type,
+            insurance_id=None,
+            hospital_id=None,
+        )
+
 
         # Fetch the ID of the selected insurance
         if insurance_name is not None:
@@ -196,7 +207,7 @@ def getname():
 
             if insurance_id:
                 sql = "UPDATE User SET insurance_id = %s WHERE id = %s"
-                val = (insurance_id, userid)
+                val = (insurance_id, user_id)
                 cursor.execute(sql, val)
                 connection.commit()
 
@@ -212,11 +223,16 @@ def getname():
 
             if hospital_id:
                 sql = "UPDATE User SET hospital_id = %s WHERE id = %s"
-                val = (hospital_id, userid)
+                val = (hospital_id, user_id)
                 cursor.execute(sql, val)
                 connection.commit()
-
-        flash(f"Success!", category="success")
+        
+        # Log in the user
+        login_user(user)
+        flash(
+            f"Account created successfully! You are now logged in as {username}",
+            category="success",
+        )
         return redirect(url_for("home"))
 
     cursor.execute("SELECT name FROM insurance")
@@ -227,12 +243,7 @@ def getname():
     # Fetch all rows and store the names in the hospital_names list
     for row in cursor.fetchall():
         hospital_names.append(row[0])
-    return render_template(
-        "getname.html",
-        form=form,
-        insurance_names=insurance_names,
-        hospital_names=hospital_names,
-    )
+    return render_template("getname.html",form=form,insurance_names=insurance_names,hospital_names=hospital_names, user_type=user_type)
 
 
 @myapp_obj.context_processor
@@ -324,10 +335,6 @@ def addHospital():
         flash(f"Success! {name} has been added", category="success")
         return redirect(url_for("home"))
     return render_template("addHospital.html", form=form)
-
-
-from flask import flash, redirect, render_template, url_for
-from flask_login import current_user
 
 
 @myapp_obj.route("/addInsurance", methods=["GET", "POST"])
