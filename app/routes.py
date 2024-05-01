@@ -228,6 +228,7 @@ def getname():
                 cursor.execute(sql, val)
                 connection.commit()
         
+        session.pop('registration_data', None)
         # Log in the user
         login_user(user)
         flash(
@@ -299,7 +300,42 @@ def addHospital():
     if form.validate_on_submit():
         name = form.name.data
         address = form.address.data
+        registration_data = session.get('registration_data')
+        user_type = registration_data.get('user_type')
         phone_number = form.phone_number.data
+        username = registration_data.get('username')
+        email_address = registration_data.get('email_address')
+        firstname = registration_data.get('firstname')
+        lastname = registration_data.get('lastname')
+        password_hash = registration_data.get('password_hash')
+
+
+        # Insert user data into the database and log in user
+        sql = "INSERT INTO User (username, firstname, lastname, email_address, password_hash, user_type) VALUES (%s, %s, %s, %s, %s, %s)"
+        val = (
+            username,
+            firstname,
+            lastname,
+            email_address,
+            password_hash,
+            user_type,
+        )
+        cursor.execute(sql, val)
+        connection.commit()
+        user_id = cursor.lastrowid
+
+        # Create an instance of the User class
+        user = User(
+            user_id=user_id,
+            username=username,
+            firstname=firstname,
+            lastname=lastname,
+            email_address=email_address,
+            password_hash=password_hash,
+            user_type=user_type,
+            insurance_id=None,
+            hospital_id=None,
+        )
 
         connection.autocommit = False
 
@@ -314,13 +350,11 @@ def addHospital():
             # Retrieve the hospital_id of the newly inserted hospital
             sql = "SELECT LAST_INSERT_ID()"
             cursor.execute(sql)
-            hospital_id = cursor.fetchone()[
-                0
-            ]  # Assuming the hospital_id is the first column in the result
+            hospital_id = cursor.fetchone()[0]  # Assuming the hospital_id is the first column in the result
 
             # Update the User table to set the hospital_id for the current user
             sql = "UPDATE User SET hospital_id = %s WHERE id = %s"
-            val = (hospital_id, current_user.id)
+            val = (hospital_id, user_id)
             cursor.execute(sql, val)
 
             # Commit the transaction
@@ -334,6 +368,13 @@ def addHospital():
             connection.autocommit = True
 
         flash(f"Success! {name} has been added", category="success")
+        session.pop('registration_data', None)
+        # Log in the user
+        login_user(user)
+        flash(
+            f"Account created successfully! You are now logged in as {username}",
+            category="success",
+        )
         return redirect(url_for("home"))
     return render_template("addHospital.html", form=form)
 
@@ -344,7 +385,41 @@ def addInsurance():
     if form.validate_on_submit():
         name = form.name.data
         phone_number = form.phone_number.data
+        registration_data = session.get('registration_data')
+        user_type = registration_data.get('user_type')
+        username = registration_data.get('username')
+        email_address = registration_data.get('email_address')
+        firstname = registration_data.get('firstname')
+        lastname = registration_data.get('lastname')
+        password_hash = registration_data.get('password_hash')
 
+
+        # Insert user data into the database and log in user
+        sql = "INSERT INTO User (username, firstname, lastname, email_address, password_hash, user_type) VALUES (%s, %s, %s, %s, %s, %s)"
+        val = (
+            username,
+            firstname,
+            lastname,
+            email_address,
+            password_hash,
+            user_type,
+        )
+        cursor.execute(sql, val)
+        connection.commit()
+        user_id = cursor.lastrowid
+
+        # Create an instance of the User class
+        user = User(
+            user_id=user_id,
+            username=username,
+            firstname=firstname,
+            lastname=lastname,
+            email_address=email_address,
+            password_hash=password_hash,
+            user_type=user_type,
+            insurance_id=None,
+            hospital_id=None,
+        )
         # Start a transaction by setting autocommit to False
         connection.autocommit = False
 
@@ -357,20 +432,16 @@ def addInsurance():
             # Retrieve the insurance_id of the newly inserted insurance
             sql = "SELECT LAST_INSERT_ID()"
             cursor.execute(sql)
-            insurance_id = cursor.fetchone()[
-                0
-            ]  # Assuming the insurance_id is the first column in the result
+            insurance_id = cursor.fetchone()[0]  # Assuming the insurance_id is the first column in the result
 
             # Update the User table to set the insurance_id for the current user
             sql = "UPDATE User SET insurance_id = %s WHERE id = %s"
-            val = (insurance_id, current_user.id)
+            val = (insurance_id, user_id)
             cursor.execute(sql, val)
 
             # Commit the transaction
             connection.commit()
 
-            flash(f"Success! {name} has been added", category="success")
-            return redirect(url_for("home"))
         except Exception as e:
             # Rollback the transaction in case of error
             connection.rollback()
@@ -380,6 +451,15 @@ def addInsurance():
             # Ensure the connection is set back to autocommit mode
             connection.autocommit = True
 
+        flash(f"Success! {name} has been added", category="success")
+        session.pop('registration_data', None)
+        # Log in the user
+        login_user(user)
+        flash(
+            f"Account created successfully! You are now logged in as {username}",
+            category="success",
+        )
+        return redirect(url_for("home"))
     return render_template("addInsurance.html", form=form)
 
 
