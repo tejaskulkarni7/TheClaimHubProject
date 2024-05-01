@@ -197,3 +197,9 @@ class addPatientForm(FlaskForm):
     )
     contact_info = StringField(label="Contact Info")
     submit = SubmitField(label="Add Patient")
+
+#Searching form
+class SearchForm(FlaskForm):
+    searched = StringField('Searched', validators=[DataRequired()])
+    search_by = StringField()
+    submit = SubmitField('Submit')                  #Submit button for searching

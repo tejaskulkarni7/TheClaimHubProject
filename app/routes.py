@@ -7,7 +7,8 @@ from app.forms import (
     addInsuranceForm,
     FeedbackForm,
     addClaimForm,
-    addPatientForm
+    addPatientForm,
+    SearchForm
 )
 
 from flask import render_template, redirect, url_for, request, flash, session
@@ -248,7 +249,7 @@ def getname():
 
 @myapp_obj.context_processor
 def base():
-    form = GetNameForm()
+    form = SearchForm()
     return dict(form=form)
 
 
@@ -392,6 +393,10 @@ def logoutPage():
 @myapp_obj.route("/claimpage", methods=["GET", "POST"])
 @login_required
 def claimpage():
+
+    search_results = session.get('search_results', [])
+    search_made = session.get('search_made')
+
     hospital_names_dict = {}
     user_type = (
         current_user.user_type
@@ -478,6 +483,29 @@ def claimpage():
         patient_names = {patient[0]: patient[1] for patient in patients}
     else:
         patient_names = {}
+
+    #search functionality to restrict claims to what has been searched:
+    if search_results or search_made:
+        claims2 = search_results # IMPORTANT --> overrides all claims set to give a limited result set specified by search query
+        if claims2:
+            claim_ids1 = {claim_ran[0] for claim_ran in claims}
+            claim_ids2 = {claim_ran[0] for claim_ran in claims2}
+            claims = claim_ids1 & claim_ids2
+            # Initialize an empty list to store the results
+            all_claims = []
+            # Iterate over each claim ID in the intersection set
+            for claim_id in claims:
+                # Execute the query for each claim ID
+                cursor.execute("SELECT * FROM claim WHERE claim_id = %s", (claim_id,))
+                # Fetch all results for this claim ID and extend the all_claims list
+                all_claims.extend(cursor.fetchall())
+            # Now all_claims contains all rows from the claim table where claim_id is in the intersection set
+            claims = all_claims
+        else:
+            claims = []
+        session.pop('search_results', None)
+        session.pop('search_made', None)
+
 
     cursor.execute(
         """
@@ -679,7 +707,47 @@ def addpatient():
         cursor.execute(sql, val)
         connection.commit()
 
-        flash(f"Patient Added!", category="success")
-        return redirect(url_for("claimpage"))
+        return redirect(url_for("patientspage"))
     # Render the template with the patients data
     return render_template("addpatient.html", form=form)
+
+
+@myapp_obj.route('/search', methods=['GET', 'POST'])
+@login_required
+def search():
+    form = SearchForm()
+    if form.validate_on_submit():
+        searched = form.searched.data
+        search_by = form.search_by.data
+        
+        # Initialize an empty list to store the search results
+        search_results = []
+        
+        # Perform the search based on the user's input
+        if search_by == 'Patient':
+            cursor.execute("SELECT * FROM claim WHERE patient_id IN (SELECT patient_id FROM patient WHERE name LIKE %s)", ('%' + searched + '%',))
+        elif search_by == 'Hospital':
+            cursor.execute("SELECT * FROM claim WHERE hospital_id IN (SELECT hospital_id FROM hospital WHERE name LIKE %s)", ('%' + searched + '%',))
+        elif search_by == 'Insurance':
+            cursor.execute("SELECT * FROM claim WHERE insurance_id IN (SELECT insurance_id FROM insurance WHERE name LIKE %s)", ('%' + searched + '%',))
+        elif search_by == 'Procedure':
+            cursor.execute("SELECT * FROM claim WHERE procedure_id IN (SELECT procedure_id FROM medical_procedure WHERE name LIKE %s)", ('%' + searched + '%',))
+        else:
+            flash('Invalid search criteria.', category='danger')
+            return redirect(url_for('claimpage'))
+
+        # Fetch the search results
+        search_results = cursor.fetchall()
+        session['search_results'] = search_results
+        session['search_made'] = True
+
+        #search history functionality
+        sql = "INSERT INTO search_history (user_id, search_term, search_by) VALUES (%s, %s, %s)"
+        val = (current_user.id, searched, search_by)
+        cursor.execute(sql, val)
+        connection.commit()
+        # Redirect to the claimpage route with the search results
+        return redirect(url_for('claimpage', search_results=search_results))
+    
+    return render_template("base.html", form=form)
+
