@@ -498,6 +498,12 @@ def claimpage():
             if claim:
                 claim_id = claim[0]  # Assuming the user ID is at index 0
 
+                #for the edit log 
+                sql = "INSERT INTO edit_log (user_id, claim_id, edit_type) VALUES (%s, %s, %s)"
+                val = (current_user.id, claim_id, "delete")
+                cursor.execute(sql, val)
+                connection.commit()
+
                 # delete the claim (foreign key constraint bypassed intentionally)
                 cursor.execute("DELETE FROM claim WHERE claim_id = %s", (claim_id,))
                 connection.commit()
@@ -515,6 +521,12 @@ def claimpage():
             cursor.execute("SELECT * FROM claim WHERE claim_id = %s", (claim_id,))
             claim = cursor.fetchone()
             if claim:
+                 #first update edit_log
+                sql = "INSERT INTO edit_log (user_id, claim_id, edit_type) VALUES (%s, %s, %s)"
+                val = (current_user.id, claim_id, "change_status")
+                cursor.execute(sql, val)
+                connection.commit()
+
                 # Update the claim's status
                 cursor.execute(
                     "UPDATE claim SET status = %s WHERE claim_id = %s",
@@ -616,6 +628,14 @@ def addclaim():
                 total_amount,
                 description,
             )
+            cursor.execute(sql, val)
+            connection.commit()
+            sql = "SELECT LAST_INSERT_ID()"  #select last created id
+            cursor.execute(sql)
+            claim_id = cursor.fetchone()[0]
+            
+            sql = "INSERT INTO edit_log (user_id, claim_id, edit_type) VALUES (%s, %s, %s)"
+            val = (current_user.id, claim_id, "create")
             cursor.execute(sql, val)
             connection.commit()
 
