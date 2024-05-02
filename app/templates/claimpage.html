@@ -36,7 +36,7 @@ Claims
         /* Style for the "Add Claim" button */
         .add-claim-btn {
             position: absolute;
-            top: 10px;
+            top: -100px;
             right: 10px;
             padding: 10px 20px;
             background-color: #007bff;
@@ -67,14 +67,30 @@ Claims
             background-color: #007bff;
             color: white;
         }
+        .select-left {
+    max-width: 100px; /* Adjust the maximum width as needed */
+    margin-left: 0px; /* Aligns the element to the left */
+    padding: 5px; /* Adds some padding inside the select element */
+}
+
     </style>
 </head>
-<body> 
+<body>
+  <form method="POST" action="{{ url_for('claimpage') }}">
+    <div class="form-group" style="margin-left: 40px; margin-top: 20px;">
+        <label for="sortOrder">Sort by:</label>
+        <select name="sortOrder" id="sortOrder" class="form-control select-left">
+          <option value="asc">Oldest</option>
+          <option value="desc">Newest</option>
+      </select>      
+    </div>
+    <button type="submit" class="btn btn-primary" style="margin-left: 40px;">Apply Sort</button>
+  </form>
 <div class="button-container">
     <!-- "Add Claim" Button -->
     <a href="{{ url_for('addclaim') }}" class="add-claim-btn">Add Claim</a>
 </div>
-<div style="padding-top: 15px;"></div>
+<div style="padding-top: -20px;"></div>
 <ul style="list-style-type: none; flex-wrap: wrap; color: black">
     {% for claim in claims %}
     <div style="

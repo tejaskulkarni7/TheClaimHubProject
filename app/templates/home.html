@@ -21,6 +21,9 @@ Home
             <a href="{{ url_for('patientspage') }}">
                 <input type="button" class="text-center shadow-lg p-2 mb-0 bg-body rounded btn btn-dark" value="Patients"/>
             </a>
-   </div>
+        </div>
+        {%if access=="admin" %}
+        <p>this user is an admin</p>
+        {% endif %}
     </div>
 {% endblock %}

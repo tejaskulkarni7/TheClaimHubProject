@@ -25,6 +25,7 @@ cursor = connection.cursor()
 @login_required
 def home():
     user_location_name = None
+    access = "default"
     if current_user.is_authenticated:
         user_type = current_user.user_type
         if user_type == "insurance_provider":
@@ -44,9 +45,12 @@ def home():
 
         if result:
             user_location_name = result[0]
+        if current_user.username == "admin":
+            access = "admin"
+            
 
     return render_template(
-        "home.html", title="Home", user_location_name=user_location_name
+        "home.html", title="Home", user_location_name=user_location_name, access=access
     )
 
 
@@ -662,6 +666,10 @@ def claimpage():
             else:
                 flash("Error!", category="danger")
             return redirect(url_for("claimpage"))
+        if (request.form.get("sortOrder") == "asc"):
+            claims = sorted(claims, key=lambda x: x[6])
+        if (request.form.get("sortOrder") == "desc"):
+            claims = sorted(claims, key=lambda x: x[6], reverse=True)
 
     return render_template(
         "claimpage.html",
