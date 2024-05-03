@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}
+Admin Page
+{% endblock title %}
+
+{% block content %}
+
+<body>
+    <div style="padding-top: 15px;"></div>
+    <div class="button-container">
+        <h2 style="color: black;">Admin Page - Edit History</h2>
+    <table style="width: 100%; border-collapse: collapse; color: black; margin-top: 35px;">
+        <thead>
+            <tr>
+                <th>Log ID</th>
+                <th>User ID</th>
+                <th>User</th>
+                <th>Claim ID</th>
+                <th>Edit Type</th>
+                <th>Edit Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for edit in all_edits %}
+            <tr style="background-color: white; border: 1px solid #ddd; padding: 10px 0;">
+                <td>{{ edit[0] }}</td>
+                <td>{{ edit[1] }}</td>
+                <td>{{ users_dict[edit[1]] }}</td>
+                <td>{{ edit[2] }}</td>
+                <td>{{ edit[3] }}</td>
+                <td>{{ edit[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+{% endblock content %}
+
+</html>

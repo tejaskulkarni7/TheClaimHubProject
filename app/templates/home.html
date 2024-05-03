@@ -3,7 +3,22 @@
 Home
 {% endblock %}
 {% block content %}
+<style>
+    .admin-button-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 20px;
+}
+</style>
     <div class="position-relative overflow-hidden p-3 p-3 d-md-block text-center bg-dark" style="color:white">
+        <div class="admin-button-container">
+            {% if access=="admin" %}
+                <a href="{{ url_for('admin') }}" class="btn btn-dark">
+                    Admin
+                </a>
+            {% endif %}
+        </div>
         <div class="col-md-5 p-lg-5 mx-auto my-5">
             <h1 class="shadow-lg p-3 mb-5 bg-body rounded" class="display-4 font-weight-normal">TheClaimHub</h1>
             <p class="navbar-text text-center text-white">Currently logged in as:</p>
@@ -22,8 +37,5 @@ Home
                 <input type="button" class="text-center shadow-lg p-2 mb-0 bg-body rounded btn btn-dark" value="Patients"/>
             </a>
         </div>
-        {%if access=="admin" %}
-        <p>this user is an admin</p>
-        {% endif %}
     </div>
 {% endblock %}

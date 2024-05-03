@@ -47,12 +47,32 @@ def home():
             user_location_name = result[0]
         if current_user.username == "admin":
             access = "admin"
-            
 
     return render_template(
         "home.html", title="Home", user_location_name=user_location_name, access=access
     )
 
+@myapp_obj.route('/admin')
+def admin():
+    if current_user.username == 'admin':
+        flash("Welcome Admin!", category="success")
+        cursor.execute("SELECT * FROM edit_log")
+        all_edits = cursor.fetchall()
+        # Extract all unique user IDs from the claims
+        user_ids = list(set(edit[1] for edit in all_edits))  # Assuming users are at index 1
+
+        if user_ids:
+            placeholders = ", ".join(["%s"] * len(user_ids))
+            cursor.execute(f"SELECT id, firstname, lastname FROM User WHERE id IN ({placeholders})", tuple(user_ids))
+            users = cursor.fetchall()
+        else:
+            users = []
+
+        # Create a dictionary mapping user IDs to user names
+        users_dict = {user[0]: (user[1], user[2]) for user in users}  # Combine first and last name into a single string
+    else:
+        return redirect(url_for('home'))  # Redirect to login if user is not logged in as admin
+    return render_template("admin.html", users_dict=users_dict, all_edits=all_edits)
 
 @myapp_obj.route("/signup", methods=["GET", "POST"])
 def signupPage():
@@ -482,48 +502,61 @@ def claimpage():
     search_made = session.get('search_made')
 
     hospital_names_dict = {}
-    user_type = (
-        current_user.user_type
-    )  # Current users hospital/insurance type & id for query
-    if user_type == "insurance_provider":
+    user_type = (current_user.user_type)  # Current users hospital/insurance type & id for query
+# Initialize an empty set to collect unique claims
+    unique_claims = set()
+
+    if user_type == "insurance_provider" or current_user.username == "admin":
         users_insurance_id = current_user.insurance_id
-        cursor.execute(
-            "SELECT * FROM claim WHERE insurance_id = %s", (users_insurance_id,)
-        )  # Fetch all claims that are from the same insurance as the current user
-        claims = cursor.fetchall()
-        cursor.execute(
-            "SELECT hospital_id FROM claim WHERE insurance_id = %s",
-            (users_insurance_id,),
-        )
-        hospital_ids = cursor.fetchall()
-        for row in hospital_ids:
-            hospital_id = row[0]  # Extracting the hospital ID from the fetched row
-            cursor.execute(
-                "SELECT name FROM hospital WHERE hospital_id = %s", (hospital_id,)
-            )
-            name = cursor.fetchone()
-            if name:
-                hospital_names_dict[hospital_id] = name[0]
+        if current_user.username == "admin":
+            cursor.execute("SELECT * FROM claim")
+            # Add all claims to the set to ensure uniqueness
+            unique_claims.update(cursor.fetchall())
+            cursor.execute("SELECT hospital_id FROM claim")
+            hospital_ids = cursor.fetchall()
+            for row in hospital_ids:
+                hospital_id = row[0]
+                cursor.execute("SELECT name FROM hospital WHERE hospital_id = %s", (hospital_id,))
+                name = cursor.fetchone()
+                if name:
+                    hospital_names_dict[hospital_id] = name[0]
+        else:
+            cursor.execute("SELECT * FROM claim WHERE insurance_id = %s", (users_insurance_id,))
+            unique_claims.update(cursor.fetchall())  # Add claims to the set
+            cursor.execute("SELECT hospital_id FROM claim WHERE insurance_id = %s", (users_insurance_id,))
+            hospital_ids = cursor.fetchall()
+            for row in hospital_ids:
+                hospital_id = row[0]
+                cursor.execute("SELECT name FROM hospital WHERE hospital_id = %s", (hospital_id,))
+                name = cursor.fetchone()
+                if name:
+                    hospital_names_dict[hospital_id] = name[0]
+
+    # Initialize insurance_names_dict for all users
     insurance_names_dict = {}
-    if user_type == "hospital":
-        users_hospital_id = current_user.hospital_id
-        cursor.execute(
-            "SELECT * FROM claim WHERE hospital_id = %s", (users_hospital_id,)
-        )  # Fetch all claims that are from the same hospital as the current user
-        claims = cursor.fetchall()
-        cursor.execute(
-            "SELECT insurance_id FROM claim WHERE hospital_id = %s",
-            (users_hospital_id,),
-        )
-        insurance_ids = cursor.fetchall()
-        for row in insurance_ids:
-            insurance_id = row[0]  # Extracting the insurance ID from the fetched row
-            cursor.execute(
-                "SELECT name FROM insurance WHERE insurance_id = %s", (insurance_id,)
-            )
-            name = cursor.fetchone()
-            if name:
-                insurance_names_dict[insurance_id] = name[0]
+
+    if user_type == "hospital" or current_user.username == "admin":
+        if current_user.username == "admin":
+            cursor.execute("SELECT * FROM claim")
+            additional_claims = cursor.fetchall()  # Fetch all claims for admin
+            # Add the new claims to the set to ensure uniqueness
+            unique_claims.update(additional_claims)
+        else:
+            users_hospital_id = current_user.hospital_id
+            cursor.execute("SELECT * FROM claim WHERE hospital_id = %s", (users_hospital_id,))
+            unique_claims.update(cursor.fetchall())  # Add claims to the set
+            cursor.execute("SELECT insurance_id FROM claim WHERE hospital_id = %s", (users_hospital_id,))
+            insurance_ids = cursor.fetchall()
+            for row in insurance_ids:
+                insurance_id = row[0]
+                cursor.execute("SELECT name FROM insurance WHERE insurance_id = %s", (insurance_id,))
+                name = cursor.fetchone()
+                if name:
+                    insurance_names_dict[insurance_id] = name[0]
+
+    # Convert the set of unique claims back to a list
+    claims = list(unique_claims)
+
 
     # Initialize a dictionary to store procedure names by their IDs
     procedure_names_dict = {}
