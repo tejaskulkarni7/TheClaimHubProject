@@ -203,3 +203,9 @@ class SearchForm(FlaskForm):
     searched = StringField('Searched', validators=[DataRequired()])
     search_by = StringField()
     submit = SubmitField('Submit')                  #Submit button for searching
+
+class addProcedureForm(FlaskForm):
+    name = StringField(label="Procedure Name")
+    description = TextAreaField(label="Description")
+    cost = DecimalField(label="Procedure Cost")
+    submit = SubmitField(label="Add Procedure")

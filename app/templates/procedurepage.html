@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}
+Procedures
+{% endblock title %}
+
+{% block content %}
+
+<body>
+
+    <head>
+        <style>
+            /* Style for the "Add Patient" button */
+            .add-patient-btn {
+                position: absolute;
+                top: 70px;
+                right: 10px;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <div style="padding-top: 15px;"></div>
+    <div class="button-container">
+        <!-- "Add Procedure" Button -->
+        <a href="{{ url_for('addprocedure') }}" class="add-patient-btn">Add Procedure</a>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; color: black; margin-top: 35px;">
+        <thead>
+            <tr>
+                <th>Procedure ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for procedure in procedures %}
+            <tr style="background-color: white; border: 1px solid #ddd; padding: 10px 0;">
+                <td>{{ procedure[0] }}</td>
+                <td>{{ procedure[1] }}</td>
+                <td>{{ procedure[2] }}</td>
+                <td>{{ procedure[3] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</body>
+{% endblock content %}
+
+</html>

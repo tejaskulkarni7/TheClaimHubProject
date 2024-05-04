@@ -872,3 +872,30 @@ def search():
     
     return render_template("base.html", form=form)
 
+
+@myapp_obj.route("/procedurepage", methods=["GET", "POST"])
+@login_required
+def procedurepage():
+    # Execute the query to fetch all procedures
+    cursor.execute("SELECT * FROM medical_procedure")
+    procedures = cursor.fetchall()
+
+    # Render the template with the procedure data
+    return render_template("procedurepage.html", procedures=procedures)
+
+@myapp_obj.route("/addprocedure", methods=["GET", "POST"])
+@login_required
+def addprocedure():
+    form = addProcedureForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        description = form.description.data
+        cost = form.cost.data
+        sql = "INSERT INTO medical_procedure (name, description, cost) VALUES (%s, %s, %s)"
+        val = (name, description, cost)
+        cursor.execute(sql, val)
+        connection.commit()
+
+        return redirect(url_for("procedurepage"))
+    # Render the template with the patients data
+    return render_template("addprocedure.html", form=form)
