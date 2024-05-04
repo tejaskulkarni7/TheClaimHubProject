@@ -8,6 +8,7 @@ from app.forms import (
     FeedbackForm,
     addClaimForm,
     addPatientForm,
+    addProcedureForm,
     SearchForm
 )
 
@@ -58,21 +59,12 @@ def admin():
         flash("Welcome Admin!", category="success")
         cursor.execute("SELECT * FROM edit_log")
         all_edits = cursor.fetchall()
-        # Extract all unique user IDs from the claims
-        user_ids = list(set(edit[1] for edit in all_edits))  # Assuming users are at index 1
-
-        if user_ids:
-            placeholders = ", ".join(["%s"] * len(user_ids))
-            cursor.execute(f"SELECT id, firstname, lastname FROM User WHERE id IN ({placeholders})", tuple(user_ids))
-            users = cursor.fetchall()
-        else:
-            users = []
-
-        # Create a dictionary mapping user IDs to user names
-        users_dict = {user[0]: (user[1], user[2]) for user in users}  # Combine first and last name into a single string
+        
+        cursor.execute("SELECT * FROM search_history")
+        all_search = cursor.fetchall()
     else:
         return redirect(url_for('home'))  # Redirect to login if user is not logged in as admin
-    return render_template("admin.html", users_dict=users_dict, all_edits=all_edits)
+    return render_template("admin.html", all_edits=all_edits, all_search=all_search)
 
 @myapp_obj.route("/signup", methods=["GET", "POST"])
 def signupPage():
@@ -644,8 +636,8 @@ def claimpage():
                 claim_id = claim[0]  # Assuming the user ID is at index 0
 
                 #for the edit log 
-                sql = "INSERT INTO edit_log (user_id, claim_id, edit_type) VALUES (%s, %s, %s)"
-                val = (current_user.id, claim_id, "delete")
+                sql = "INSERT INTO edit_log (user_id, user_first, user_last, claim_id, edit_type) VALUES (%s, %s, %s, %s, %s)"
+                val = (current_user.id, current_user.firstname, current_user.lastname, claim_id, "delete")
                 cursor.execute(sql, val)
                 connection.commit()
 
@@ -667,8 +659,8 @@ def claimpage():
             claim = cursor.fetchone()
             if claim:
                  #first update edit_log
-                sql = "INSERT INTO edit_log (user_id, claim_id, edit_type) VALUES (%s, %s, %s)"
-                val = (current_user.id, claim_id, "change_status")
+                sql = "INSERT INTO edit_log (user_id, user_first, user_last, claim_id, edit_type) VALUES (%s, %s, %s, %s, %s)"
+                val = (current_user.id, current_user.firstname, current_user.lastname, claim_id, "change_status")
                 cursor.execute(sql, val)
                 connection.commit()
 
@@ -783,8 +775,8 @@ def addclaim():
             cursor.execute(sql)
             claim_id = cursor.fetchone()[0]
             
-            sql = "INSERT INTO edit_log (user_id, claim_id, edit_type) VALUES (%s, %s, %s)"
-            val = (current_user.id, claim_id, "create")
+            sql = "INSERT INTO edit_log (user_id, user_first, user_last, claim_id, edit_type) VALUES (%s, %s, %s, %s, %s)"
+            val = (current_user.id, current_user.firstname, current_user.lastname, claim_id, "create")
             cursor.execute(sql, val)
             connection.commit()
 
@@ -863,8 +855,8 @@ def search():
         session['search_made'] = True
 
         #search history functionality
-        sql = "INSERT INTO search_history (user_id, search_term, search_by) VALUES (%s, %s, %s)"
-        val = (current_user.id, searched, search_by)
+        sql = "INSERT INTO search_history (user_id, user_first, user_last, search_term, search_by) VALUES (%s, %s, %s, %s, %s)"
+        val = (current_user.id, current_user.firstname, current_user.lastname, searched, search_by)
         cursor.execute(sql, val)
         connection.commit()
         # Redirect to the claimpage route with the search results

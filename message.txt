@@ -62,10 +62,11 @@ CREATE TABLE claim (
 CREATE TABLE search_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    user_first VARCHAR(50) NOT NULL,
+    user_last VARCHAR(50) NOT NULL,
     search_term VARCHAR(255) NOT NULL,
     search_by ENUM('Hospital', 'Insurance', 'Patient', 'Procedure') NOT NULL,
-    search_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
+    search_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE comment (
@@ -89,6 +90,8 @@ CREATE TABLE feedback (
 CREATE TABLE edit_log (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    user_first VARCHAR(50) NOT NULL,
+    user_last VARCHAR(50) NOT NULL,
     claim_id INT NOT NULL,
     edit_type ENUM('change_status', 'delete', 'create') NOT NULL,
     edit_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -133,10 +136,10 @@ VALUES (2, 2, 1, 1, 'Approved', '2024-03-15', 1500.00, 1200.00, 'successful, pat
 	   (1, 2, 3, 3, 'Rejected', '2024-03-25', 1800.00, 0.00, 'incorrect claim, forwarding to Cigna');
 
 
-INSERT INTO search_history (user_id, search_term, search_by)
-VALUES (1, 'Knee Replacement Surgery', 'Procedure'),
-       (2, 'Cataract Surgery', 'Procedure'),
-       (3, 'Heart Bypass Surgery', 'Procedure');
+INSERT INTO search_history (user_id, user_first, user_last, search_term, search_by)
+VALUES (1, 'Bob', 'Ross', 'Knee Replacement Surgery', 'Procedure'),
+       (2, 'Michael', 'Phelps', 'Cataract Surgery', 'Procedure'),
+       (3, 'Erl', 'Bodgins', 'Heart Bypass Surgery', 'Procedure');
 
 INSERT INTO comment (user_id, claim_id, comment_content)
 VALUES (1, 1, 'I have all the necessary documents for this claim.'),
@@ -147,7 +150,7 @@ INSERT INTO feedback (user_id, feedback_content)
 VALUES (1, 'The user interface is very intuitive and easy to navigate.'),
        (2, 'I would like to see more options for customizing my dashboard.');
 
-INSERT INTO edit_log (user_id, claim_id, edit_type)
-VALUES (1, 1, 'change_status'),
-       (2, 2, 'delete'),
-       (1, 3, 'create');
+INSERT INTO edit_log (user_id, user_first, user_last, claim_id, edit_type)
+VALUES (1,'Tommy', 'Gandalf', 1, 'change_status'),
+       (2,'Mary', 'Poppins', 2, 'delete'),
+       (1,'Andrew', 'Aurora',3, 'create');

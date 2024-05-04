@@ -25,10 +25,37 @@ Admin Page
             <tr style="background-color: white; border: 1px solid #ddd; padding: 10px 0;">
                 <td>{{ edit[0] }}</td>
                 <td>{{ edit[1] }}</td>
-                <td>{{ users_dict[edit[1]] }}</td>
-                <td>{{ edit[2] }}</td>
-                <td>{{ edit[3] }}</td>
+                <td>{{ edit[2] }}, {{ edit[3] }}</td>
                 <td>{{ edit[4] }}</td>
+                <td>{{ edit[5] }}</td>
+                <td>{{ edit[6] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="padding-top: 65px;"></div>
+    <div class="button-container">
+        <h2 style="color: black;">Search History</h2>
+    <table style="width: 100%; border-collapse: collapse; color: black; margin-top: 15px;">
+        <thead>
+            <tr>
+                <th>History ID</th>
+                <th>User ID</th>
+                <th>User</th>
+                <th>Search Term</th>
+                <th>Search By</th>
+                <th>Search Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for search in all_search %}
+            <tr style="background-color: white; border: 1px solid #ddd; padding: 10px 0;">
+                <td>{{ search[0] }}</td>
+                <td>{{ search[1] }}</td>
+                <td>{{ search[2] }}, {{ search[3] }}</td>
+                <td>{{ search[4] }}</td>
+                <td>{{ search[5] }}</td>
+                <td>{{ search[6] }}</td>
             </tr>
             {% endfor %}
         </tbody>
