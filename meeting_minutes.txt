@@ -1,0 +1,20 @@
+MEETING MINUTES:
+
+3/26/2024 (25 minutes)- discussed overall project plan, and got started with writing proposal. Everyone attended.
+
+3/29/2024 (1.5 hours)- Designed project architecture, primarily decided what pages and features we would have. 
+                       Everyone attended this meeting
+
+4/6/2024 (2 hours)- Worked on ER diagram design, everyone worked on this together.
+
+4/14/2024 (25 minutes)- Discussed our skills and experience. Assigned parts of the project to eachother.
+
+4/19/2024 (25 minutes)- Initial code was committed, we discussed as a team how to organize our code and 
+                        where everyone should be making changes.
+
+4/28/2024 (2 hours)- Went through current progress, discussed remaining work. 
+                     Split some more pending tasks among team. Created Canva presentation. Everyone attended.
+
+5/3/2024 (1 hour)- discussed next steps regarding presentation. Helped eachother fix some minor security related issues
+
+5/4/2024 (1 hour)- Final meeting. Finished code, worked on canva presentation, started on architecture diagram. Everyone attended.
