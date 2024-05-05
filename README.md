@@ -23,12 +23,16 @@
 # Division of Work
  Tejas Kulkarni (Team Leader) - User signup/login backend logic, claim page (all claims as well as update 
                                 status, comment, delete, etc.), search and sort functionality, admin page.
+                                
  Anubhav Sawhney - Feature to allow user to create and add their own insurance / hospital. Edit log captures 
                    for claim update status, delete, and addition. Was primary contributor to canva presentation
+                   
  Alfred Koh - Backend/Frontend development to "add claims" feature. Developed an info page that gave user feedback.
               Primary contributor to design schema and ER diagram.
+              
  Aung Bo Bo - Profile page backend and frontend development. Change password, delete profile functionality. Patient page as 
               well as add patient functionality. Primary contributor to architecture design.
+              
  Kaung Sithu Hein - Fully developed procedure page as well as add procedure functionality. User signup/login frontend and 
                     forms creation. Regularly modified and maintained schema and ensured it reflected projects needs
  
