@@ -62,9 +62,12 @@ def admin():
         
         cursor.execute("SELECT * FROM search_history")
         all_search = cursor.fetchall()
+
+        cursor.execute("SELECT * FROM feedback")
+        all_feedback = cursor.fetchall()
     else:
         return redirect(url_for('home'))  # Redirect to login if user is not logged in as admin
-    return render_template("admin.html", all_edits=all_edits, all_search=all_search)
+    return render_template("admin.html", all_edits=all_edits, all_search=all_search, all_feedback=all_feedback)
 
 @myapp_obj.route("/signup", methods=["GET", "POST"])
 def signupPage():

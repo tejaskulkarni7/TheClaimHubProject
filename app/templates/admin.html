@@ -60,6 +60,27 @@ Admin Page
             {% endfor %}
         </tbody>
     </table>
+    <div style="padding-top: 65px;"></div>
+    <div class="button-container">
+        <h2 style="color: black;">User Feedback</h2>
+    <table style="width: 100%; border-collapse: collapse; color: black; margin-top: 15px;">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Feedback Date</th>
+                <th>Feedback</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for feedback in all_feedback %}
+            <tr style="background-color: white; border: 1px solid #ddd; padding: 10px 0;">
+                <td>{{ feedback[1] }}</td>
+                <td>{{ feedback[2] }}</td>
+                <td>{{ feedback[3] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 {% endblock content %}
 
