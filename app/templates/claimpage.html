@@ -263,10 +263,10 @@ Claims
     </div>
     {% endfor %}
 </ul>
-<div class="pagination-container" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+<div class="pagination-container" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 20px;">
   <div class="pagination">
     {% if current_page > 1 %}
-        <a href="{{ url_for('claimpage', page=current_page-1) }}" class="btn btn-primary" style="margin-right: 10px;>Previous</a>
+        <a href="{{ url_for('claimpage', page=current_page-1) }}" class="btn btn-primary"style="margin-right: 10px;">Previous</a>
     {% endif %}
     <span>Page {{ current_page }} of {{ total_pages }}</span>
     {% if current_page < total_pages %}
