@@ -493,6 +493,7 @@ def logoutPage():
 @login_required
 def claimpage():
 
+
     search_results = session.get('search_results', [])
     search_made = session.get('search_made')
 
@@ -699,14 +700,28 @@ def claimpage():
         if (request.form.get("sortOrder") == "desc"):
             claims = sorted(claims, key=lambda x: x[6], reverse=True)
 
+    items_per_page = 10
+    # Determine the current page
+    page = request.args.get('page', 1, type=int)
+    # Calculate the start and end indices for slicing the claims list
+    start = (page - 1) * items_per_page
+    end = start + items_per_page
+    # Slice the claims list to get the claims for the current page
+    claims_for_page = claims[start:end]
+    # Calculate total number of pages
+    total_claims = len(claims)
+    total_pages = (total_claims // items_per_page) + (total_claims % items_per_page > 0)
+
     return render_template(
         "claimpage.html",
-        claims=claims,
+        claims=claims_for_page,
         patient_names=patient_names,
         hospital_names_dict=hospital_names_dict,
         insurance_names_dict=insurance_names_dict,
         procedure_names_dict=procedure_names_dict,
         comments=comments,
+        current_page=page,
+        total_pages=total_pages
     )
 
 
@@ -848,6 +863,8 @@ def search():
             cursor.execute("SELECT * FROM claim WHERE insurance_id IN (SELECT insurance_id FROM insurance WHERE name LIKE %s)", ('%' + searched + '%',))
         elif search_by == 'Procedure':
             cursor.execute("SELECT * FROM claim WHERE procedure_id IN (SELECT procedure_id FROM medical_procedure WHERE name LIKE %s)", ('%' + searched + '%',))
+        elif search_by == 'ID':
+            cursor.execute("SELECT * FROM claim WHERE claim_id = %s", (searched,))
         else:
             flash('Invalid search criteria.', category='danger')
             return redirect(url_for('claimpage'))

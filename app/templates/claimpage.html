@@ -75,6 +75,7 @@ Claims
 
     </style>
 </head>
+
 <body>
   <h2 style="text-align: center; font-size: 3.5em; color: black; margin-bottom: -80px; margin-top: 20px;">Claims</h2>
   <form method="POST" action="{{ url_for('claimpage') }}">
@@ -259,10 +260,21 @@ Claims
             </div>
         </div>
       </div>
-
     </div>
     {% endfor %}
 </ul>
+<div class="pagination-container" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 15px;">
+  <div class="pagination">
+    {% if current_page > 1 %}
+        <a href="{{ url_for('claimpage', page=current_page-1) }}" class="btn btn-primary" style="margin-right: 10px;>Previous</a>
+    {% endif %}
+    <span>Page {{ current_page }} of {{ total_pages }}</span>
+    {% if current_page < total_pages %}
+        <a href="{{ url_for('claimpage', page=current_page+1) }}" class="btn btn-primary" style="margin-left: 10px;">Next</a>
+    {% endif %}
+  </div>
+</div>
+
 </body>
 {% endblock content %}
 </html>

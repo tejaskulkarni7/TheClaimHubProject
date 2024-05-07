@@ -1,0 +1,1 @@
+drop table insurance, hospital, user, patient, claim, medical_procedure, search_history, feedback, comment, edit_log
