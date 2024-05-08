@@ -286,7 +286,7 @@ def infopage():
         cursor.execute(sql, val)
         connection.commit()
         flash("Feedback received!", category="success")
-        return render_template("home.html", form=form)
+        return redirect(url_for("home"))
     return render_template("infopage.html", form=form)
 
 
