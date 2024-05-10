@@ -56,8 +56,15 @@ CREATE TABLE claim (
     FOREIGN KEY (hospital_id) REFERENCES hospital(hospital_id) ON DELETE CASCADE,
     FOREIGN KEY (insurance_id) REFERENCES insurance(insurance_id) ON DELETE CASCADE,
     FOREIGN KEY (patient_id) REFERENCES patient(patient_id) ON DELETE CASCADE,
-    FOREIGN KEY (procedure_id) REFERENCES medical_procedure(procedure_id) ON DELETE CASCADE
+    FOREIGN KEY (procedure_id) REFERENCES medical_procedure(procedure_id) ON DELETE CASCADE,
+    INDEX (hospital_id),
+    INDEX (insurance_id),
+    INDEX (patient_id),
+    INDEX (procedure_id),
+    INDEX (status),
+    INDEX (date)
 );
+
 
 CREATE TABLE search_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
