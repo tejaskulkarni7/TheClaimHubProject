@@ -16,6 +16,7 @@
  - Download the repository from: https://github.com/tejaskulkarni7/theclaimhubproject.git from terminal
  - Configure your MySQL details in __init__.py
  - Run the provided sql file in your MySQL workbench to create tables and insert sample data
+ - Follow #Setup instructions
  - To run the project: (in terminal) navigate into TheClaimHubProject folder and type in the terminal: python3 run.py left click on http://127.0.0.1:5000/ (while pressing ctrl or cmd)
  - To run the project: (IDE) on your ide, open the project repository navigate to TheClaimHubProject run run.py left click on http://127.0.0.1:5000/ (while pressing ctrl or cmd)
 
