@@ -14,7 +14,7 @@
     Windows: C:> py -m ensurepip --upgrade
 # How to Run
  - Download the repository from: https://github.com/tejaskulkarni7/theclaimhubproject.git from terminal
- - Configure your MySQL details in __init__.py
+ - Configure your MySQL details in __init__.py (run 'net start MySQL80' to restart a stopped server. Must be done in terminal with admin access )
  - Run the provided sql file in your MySQL workbench to create tables and insert sample data
  - Follow #Setup instructions
  - To run the project: (in terminal) navigate into TheClaimHubProject folder and type in the terminal: python3 run.py left click on http://127.0.0.1:5000/ (while pressing ctrl or cmd)
